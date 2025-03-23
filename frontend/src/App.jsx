@@ -10,6 +10,10 @@ import Packages from './pages/Packages';
 import SignIn from './pages/SignIn';
 import SignUp from './pages/SignUp';
 import Cart from './pages/Cart';
+import LogoDesign from './pages/services/LogoDesign';
+import MarketingMaterials from './pages/services/MarketingMaterials';
+import SustainableProducts from './pages/services/SustainableProducts';
+import PersonalizedProducts from './pages/services/PersonalizedProducts';
 import { AuthProvider } from './context/AuthContext';
 import './App.css';
 
@@ -39,6 +43,10 @@ function App() {
             <Route path="/signin" element={<SignIn />} />
             <Route path="/signup" element={<SignUp />} />
             <Route path="/cart" element={<Cart />} />
+            <Route path="/services/logo-design" element={<LogoDesign />} />
+            <Route path="/services/marketing-materials" element={<MarketingMaterials />} />
+            <Route path="/services/sustainable-products" element={<SustainableProducts />} />
+            <Route path="/services/personalized-products" element={<PersonalizedProducts />} />
           </Routes>
           
           {/* Footer */}

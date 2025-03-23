@@ -11,25 +11,25 @@ const ProductsGrid = () => {
       title: "Logo Designs",
       description: "Professional logo design services for your brand identity",
       icon: <BrushIcon className="text-5xl text-blue-600" />,
-      link: "/products/logo-designs"
+      link: "/services/logo-design"
     },
     {
       title: "Marketing Materials",
       description: "High-quality prints for all your marketing needs",
       icon: <CampaignIcon className="text-5xl text-blue-600" />,
-      link: "/products/marketing"
+      link: "/services/marketing-materials"
     },
     {
       title: "Sustainable Products",
       description: "Eco-friendly printing solutions and materials",
       icon: <RecyclingIcon className="text-5xl text-blue-600" />,
-      link: "/products/sustainable"
+      link: "/services/sustainable-products"
     },
     {
       title: "Personalized Products",
       description: "Custom designs for your unique requirements",
       icon: <PersonIcon className="text-5xl text-blue-600" />,
-      link: "/products/personalized"
+      link: "/services/personalized-products"
     }
   ];
 
