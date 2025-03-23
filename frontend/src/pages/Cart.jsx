@@ -1,167 +1,260 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
+import { useNavigate } from 'react-router-dom';
+import { useCart } from '../context/CartContext';
 import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 const Cart = () => {
-  // Sample cart items - in a real app, this would come from a cart context/state management
-  const [cartItems, setCartItems] = useState([
-    {
-      id: 1,
-      name: 'Business Cards',
-      description: 'Premium matte finish, 300gsm',
-      quantity: 2,
-      price: 24.99,
-      image: 'https://via.placeholder.com/150',
-    },
-    {
-      id: 2,
-      name: 'Flyers',
-      description: 'Full color, double-sided, 170gsm',
-      quantity: 1,
-      price: 19.99,
-      image: 'https://via.placeholder.com/150',
-    },
-  ]);
+  const navigate = useNavigate();
+  const { cart = [], cartSummary, updateCartItem, removeFromCart, clearCart, checkout } = useCart();
+  const [isCheckingOut, setIsCheckingOut] = useState(false);
+  const [shippingAddress, setShippingAddress] = useState({
+    street: '',
+    city: '',
+    state: '',
+    zip: ''
+  });
 
-  const updateQuantity = (id, change) => {
-    setCartItems(items =>
-      items.map(item => {
-        if (item.id === id) {
-          const newQuantity = Math.max(0, item.quantity + change);
-          return { ...item, quantity: newQuantity };
-        }
-        return item;
-      }).filter(item => item.quantity > 0)
+  const handleQuantityChange = (serviceId, packageName, newQuantity) => {
+    if (newQuantity > 0) {
+      updateCartItem(serviceId, packageName, newQuantity);
+    }
+  };
+
+  const handleRemoveItem = (serviceId, packageName) => {
+    removeFromCart(serviceId, packageName);
+  };
+
+  const handleCheckout = async (e) => {
+    e.preventDefault();
+    try {
+      setIsCheckingOut(true);
+      const result = await checkout(shippingAddress, {});
+      alert('Order placed successfully! Order ID: ' + result.orderId);
+      navigate('/');
+    } catch (error) {
+      alert('Error during checkout. Please try again.');
+    } finally {
+      setIsCheckingOut(false);
+    }
+  };
+
+  if (!cart) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="text-center">
+          <h2 className="text-3xl font-bold text-gray-900">Loading cart...</h2>
+        </div>
+      </div>
     );
-  };
+  }
 
-  const removeItem = (id) => {
-    setCartItems(items => items.filter(item => item.id !== id));
-  };
-
-  const subtotal = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-  const tax = subtotal * 0.1; // 10% tax
-  const shipping = subtotal > 100 ? 0 : 10; // Free shipping over $100
-  const total = subtotal + tax + shipping;
+  if (cart.length === 0) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="text-center">
+          <h2 className="text-3xl font-bold text-gray-900">Your cart is empty</h2>
+          <p className="mt-4 text-gray-500">
+            Browse our services to add items to your cart
+          </p>
+          <button
+            onClick={() => navigate('/products')}
+            className="mt-6 bg-blue-600 text-white px-6 py-3 rounded-md hover:bg-blue-700"
+          >
+            View Services
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.5 }}
-      className="min-h-screen bg-gray-50 py-12"
-    >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h1 className="text-3xl font-extrabold text-gray-900 mb-8">Shopping Cart</h1>
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <h1 className="text-3xl font-bold text-gray-900 mb-8">Shopping Cart</h1>
 
-        {cartItems.length === 0 ? (
-          <div className="text-center py-12">
-            <h2 className="text-xl font-medium text-gray-900 mb-4">Your cart is empty</h2>
-            <Link
-              to="/products"
-              className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700"
-            >
-              Continue Shopping
-            </Link>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Cart Items */}
-            <div className="lg:col-span-2">
-              <div className="bg-white shadow-sm rounded-lg">
-                {cartItems.map((item) => (
-                  <div
-                    key={item.id}
-                    className="p-6 border-b border-gray-200 last:border-b-0"
-                  >
-                    <div className="flex items-center">
-                      <img
-                        src={item.image}
-                        alt={item.name}
-                        className="w-20 h-20 object-cover rounded"
-                      />
-                      <div className="ml-6 flex-1">
-                        <h3 className="text-lg font-medium text-gray-900">{item.name}</h3>
-                        <p className="mt-1 text-sm text-gray-500">{item.description}</p>
-                        <div className="mt-4 flex items-center justify-between">
-                          <div className="flex items-center border rounded-md">
-                            <button
-                              onClick={() => updateQuantity(item.id, -1)}
-                              className="p-2 hover:bg-gray-100"
-                            >
-                              <RemoveIcon fontSize="small" />
-                            </button>
-                            <span className="px-4 py-2 border-x">{item.quantity}</span>
-                            <button
-                              onClick={() => updateQuantity(item.id, 1)}
-                              className="p-2 hover:bg-gray-100"
-                            >
-                              <AddIcon fontSize="small" />
-                            </button>
-                          </div>
-                          <div className="flex items-center space-x-4">
-                            <span className="text-lg font-medium">
-                              ${(item.price * item.quantity).toFixed(2)}
-                            </span>
-                            <button
-                              onClick={() => removeItem(item.id)}
-                              className="text-red-500 hover:text-red-700"
-                            >
-                              <DeleteOutlineIcon />
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Cart Items */}
+        <div className="lg:col-span-2">
+          <div className="bg-white shadow-sm rounded-lg">
+            {cart.map((item, index) => (
+              <div
+                key={`${item.serviceId}-${item.packageName}`}
+                className={`p-6 ${
+                  index !== cart.length - 1 ? 'border-b border-gray-200' : ''
+                }`}
+              >
+                <div className="flex justify-between">
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900">
+                      {item.serviceName}
+                    </h3>
+                    <p className="text-gray-600">{item.packageName} Package</p>
+                    <p className="text-sm text-gray-500">
+                      Delivery: {item.deliveryTime}
+                    </p>
                   </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Order Summary */}
-            <div className="lg:col-span-1">
-              <div className="bg-white shadow-sm rounded-lg p-6">
-                <h2 className="text-lg font-medium text-gray-900 mb-6">Order Summary</h2>
-                <div className="space-y-4">
-                  <div className="flex justify-between">
-                    <span>Subtotal</span>
-                    <span>${subtotal.toFixed(2)}</span>
+                  <div className="text-right">
+                    <p className="text-lg font-semibold text-gray-900">
+                      ${item.price * item.quantity}
+                    </p>
+                    <p className="text-sm text-gray-500">
+                      ${item.price} per unit
+                    </p>
                   </div>
-                  <div className="flex justify-between">
-                    <span>Tax (10%)</span>
-                    <span>${tax.toFixed(2)}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Shipping</span>
-                    <span>{shipping === 0 ? 'Free' : `$${shipping.toFixed(2)}`}</span>
-                  </div>
-                  <div className="border-t pt-4">
-                    <div className="flex justify-between font-medium text-lg">
-                      <span>Total</span>
-                      <span>${total.toFixed(2)}</span>
-                    </div>
+                </div>
+                <div className="mt-4 flex items-center justify-between">
+                  <div className="flex items-center space-x-4">
+                    <button
+                      onClick={() =>
+                        handleQuantityChange(
+                          item.serviceId,
+                          item.packageName,
+                          item.quantity - 1
+                        )
+                      }
+                      className="p-1 rounded-full hover:bg-gray-100"
+                    >
+                      <RemoveIcon />
+                    </button>
+                    <span className="text-gray-900">{item.quantity}</span>
+                    <button
+                      onClick={() =>
+                        handleQuantityChange(
+                          item.serviceId,
+                          item.packageName,
+                          item.quantity + 1
+                        )
+                      }
+                      className="p-1 rounded-full hover:bg-gray-100"
+                    >
+                      <AddIcon />
+                    </button>
                   </div>
                   <button
-                    className="w-full mt-6 bg-blue-600 text-white py-3 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    onClick={() =>
+                      handleRemoveItem(item.serviceId, item.packageName)
+                    }
+                    className="text-red-600 hover:text-red-800"
                   >
-                    Proceed to Checkout
+                    <DeleteIcon />
                   </button>
-                  <Link
-                    to="/products"
-                    className="block text-center mt-4 text-sm text-blue-600 hover:text-blue-500"
-                  >
-                    Continue Shopping
-                  </Link>
+                </div>
+              </div>
+            ))}
+          </div>
+          <button
+            onClick={clearCart}
+            className="mt-4 text-red-600 hover:text-red-800"
+          >
+            Clear Cart
+          </button>
+        </div>
+
+        {/* Order Summary */}
+        <div className="lg:col-span-1">
+          <div className="bg-white shadow-sm rounded-lg p-6">
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">
+              Order Summary
+            </h2>
+            <div className="space-y-4">
+              <div className="flex justify-between">
+                <span className="text-gray-600">Subtotal</span>
+                <span className="text-gray-900">${cartSummary.subtotal}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">Tax (10%)</span>
+                <span className="text-gray-900">${cartSummary.tax}</span>
+              </div>
+              <div className="border-t border-gray-200 pt-4">
+                <div className="flex justify-between">
+                  <span className="text-lg font-semibold text-gray-900">
+                    Total
+                  </span>
+                  <span className="text-lg font-semibold text-gray-900">
+                    ${cartSummary.total}
+                  </span>
                 </div>
               </div>
             </div>
+
+            {!isCheckingOut ? (
+              <button
+                onClick={() => setIsCheckingOut(true)}
+                className="mt-6 w-full bg-blue-600 text-white px-6 py-3 rounded-md hover:bg-blue-700"
+              >
+                Proceed to Checkout
+              </button>
+            ) : (
+              <form onSubmit={handleCheckout} className="mt-6">
+                <div className="space-y-4">
+                  <input
+                    type="text"
+                    placeholder="Street Address"
+                    required
+                    value={shippingAddress.street}
+                    onChange={(e) =>
+                      setShippingAddress({
+                        ...shippingAddress,
+                        street: e.target.value,
+                      })
+                    }
+                    className="w-full px-4 py-2 border rounded-md"
+                  />
+                  <input
+                    type="text"
+                    placeholder="City"
+                    required
+                    value={shippingAddress.city}
+                    onChange={(e) =>
+                      setShippingAddress({
+                        ...shippingAddress,
+                        city: e.target.value,
+                      })
+                    }
+                    className="w-full px-4 py-2 border rounded-md"
+                  />
+                  <div className="grid grid-cols-2 gap-4">
+                    <input
+                      type="text"
+                      placeholder="State"
+                      required
+                      value={shippingAddress.state}
+                      onChange={(e) =>
+                        setShippingAddress({
+                          ...shippingAddress,
+                          state: e.target.value,
+                        })
+                      }
+                      className="w-full px-4 py-2 border rounded-md"
+                    />
+                    <input
+                      type="text"
+                      placeholder="ZIP Code"
+                      required
+                      value={shippingAddress.zip}
+                      onChange={(e) =>
+                        setShippingAddress({
+                          ...shippingAddress,
+                          zip: e.target.value,
+                        })
+                      }
+                      className="w-full px-4 py-2 border rounded-md"
+                    />
+                  </div>
+                  <button
+                    type="submit"
+                    className="w-full bg-blue-600 text-white px-6 py-3 rounded-md hover:bg-blue-700"
+                  >
+                    Place Order
+                  </button>
+                </div>
+              </form>
+            )}
           </div>
-        )}
+        </div>
       </div>
-    </motion.div>
+    </div>
   );
 };
 

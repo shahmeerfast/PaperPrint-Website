@@ -1,11 +1,32 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
+import { useCart } from '../../context/CartContext';
+import { useNavigate } from 'react-router-dom';
 import EditIcon from '@mui/icons-material/Edit';
 import ColorLensIcon from '@mui/icons-material/ColorLens';
 import DownloadIcon from '@mui/icons-material/Download';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 
 const LogoDesign = () => {
+  const { addToCart } = useCart();
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+
+  const handleAddToCart = async (packageName, price) => {
+    try {
+      setLoading(true);
+      console.log('Adding to cart:', { packageName, price });
+      await addToCart(1, packageName, 1); // Using 1 as the ID for logo design service
+      console.log('Successfully added to cart');
+      navigate('/cart');
+    } catch (error) {
+      console.error('Error adding to cart:', error);
+      alert('Failed to add item to cart. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const features = [
     {
       icon: <EditIcon className="text-blue-600 text-4xl" />,
@@ -37,18 +58,18 @@ const LogoDesign = () => {
         '2 Initial Concepts',
         '2 Revisions',
         'Basic File Formats',
-        '5 Days Delivery'
+        '3-5 Days Delivery'
       ]
     },
     {
-      name: 'Professional',
+      name: 'Standard',
       price: 499,
       features: [
         '4 Initial Concepts',
         '4 Revisions',
         'All File Formats',
         'Color Variations',
-        '3 Days Delivery'
+        '2-3 Days Delivery'
       ],
       popular: true
     },
@@ -61,7 +82,7 @@ const LogoDesign = () => {
         'All File Formats',
         'Color Variations',
         'Brand Guidelines',
-        '48h Delivery'
+        '1-2 Days Delivery'
       ]
     }
   ];
@@ -146,13 +167,17 @@ const LogoDesign = () => {
                     ))}
                   </ul>
                   <button
+                    onClick={() => handleAddToCart(pkg.name, pkg.price)}
+                    disabled={loading}
                     className={`mt-8 w-full py-3 px-4 rounded-md shadow ${
                       pkg.popular
                         ? 'bg-blue-600 text-white hover:bg-blue-700'
                         : 'bg-white text-blue-600 border border-blue-600 hover:bg-blue-50'
-                    } font-medium focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2`}
+                    } font-medium focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 ${
+                      loading ? 'opacity-50 cursor-not-allowed' : ''
+                    }`}
                   >
-                    Get Started
+                    {loading ? 'Adding...' : 'Add to Cart'}
                   </button>
                 </div>
               </div>

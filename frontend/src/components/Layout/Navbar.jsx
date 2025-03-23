@@ -4,10 +4,12 @@ import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import SearchIcon from '@mui/icons-material/Search';
 import MenuIcon from '@mui/icons-material/Menu';
 import CloseIcon from '@mui/icons-material/Close';
+import { useCart } from '../../context/CartContext';
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const { cartSummary } = useCart();
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -59,8 +61,13 @@ const Navbar = () => {
               <SearchIcon className="absolute left-3 top-2.5 text-gray-400" />
             </form>
             
-            <Link to="/cart" className="text-gray-700 hover:text-blue-600">
+            <Link to="/cart" className="text-gray-700 hover:text-blue-600 relative">
               <ShoppingCartIcon />
+              {cartSummary.totalItems > 0 && (
+                <span className="absolute -top-2 -right-2 bg-blue-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                  {cartSummary.totalItems}
+                </span>
+              )}
             </Link>
 
             <Link

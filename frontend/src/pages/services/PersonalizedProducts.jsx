@@ -1,11 +1,35 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
+import { useCart } from '../../context/CartContext';
+import { useNavigate } from 'react-router-dom';
 import PaletteIcon from '@mui/icons-material/Palette';
 import AutoFixHighIcon from '@mui/icons-material/AutoFixHigh';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import SupportAgentIcon from '@mui/icons-material/SupportAgent';
 
 const PersonalizedProducts = () => {
+  const { addToCart } = useCart();
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState(null);
+
+  const handleAddToCart = async (packageName) => {
+    try {
+      setLoading(true);
+      setSelectedProduct(packageName);
+      console.log('Adding to cart:', { packageName });
+      await addToCart(4, packageName, 1); // Using 4 as the ID for personalized products service
+      console.log('Successfully added to cart');
+      navigate('/cart');
+    } catch (error) {
+      console.error('Error adding to cart:', error);
+      alert('Failed to add item to cart. Please try again.');
+    } finally {
+      setLoading(false);
+      setSelectedProduct(null);
+    }
+  };
+
   const features = [
     {
       icon: <PaletteIcon className="text-blue-600 text-4xl" />,
@@ -34,25 +58,29 @@ const PersonalizedProducts = () => {
       title: 'Custom Stationery',
       description: 'Personalized letterheads, envelopes, and notepads',
       image: 'https://via.placeholder.com/300x200',
-      price: 'Starting at $79.99'
+      price: 199,
+      packageName: 'Basic'
     },
     {
       title: 'Photo Products',
       description: 'Custom photo books, calendars, and prints',
       image: 'https://via.placeholder.com/300x200',
-      price: 'Starting at $49.99'
+      price: 399,
+      packageName: 'Pro'
     },
     {
       title: 'Branded Merchandise',
       description: 'Custom apparel, mugs, and promotional items',
       image: 'https://via.placeholder.com/300x200',
-      price: 'Starting at $129.99'
+      price: 699,
+      packageName: 'Premium'
     },
     {
       title: 'Event Materials',
       description: 'Invitations, programs, and event signage',
       image: 'https://via.placeholder.com/300x200',
-      price: 'Starting at $99.99'
+      price: 399,
+      packageName: 'Pro'
     }
   ];
 
@@ -136,9 +164,13 @@ const PersonalizedProducts = () => {
                 <h3 className="text-xl font-bold text-gray-900 mb-2">{product.title}</h3>
                 <p className="text-gray-500 mb-4">{product.description}</p>
                 <div className="flex items-center justify-between">
-                  <span className="text-blue-600 font-medium">{product.price}</span>
-                  <button className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">
-                    Customize Now
+                  <span className="text-blue-600 font-medium">${product.price}</span>
+                  <button 
+                    onClick={() => handleAddToCart(product.packageName)}
+                    disabled={loading && selectedProduct === product.packageName}
+                    className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {loading && selectedProduct === product.packageName ? 'Adding...' : 'Add to Cart'}
                   </button>
                 </div>
               </div>

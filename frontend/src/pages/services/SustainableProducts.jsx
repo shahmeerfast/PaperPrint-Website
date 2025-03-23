@@ -1,12 +1,40 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
+import { useCart } from '../../context/CartContext';
+import { useNavigate } from 'react-router-dom';
 import NatureIcon from '@mui/icons-material/Nature';
 import AutorenewIcon from '@mui/icons-material/Autorenew';
 import OpacityIcon from '@mui/icons-material/Opacity';
 import BoltIcon from '@mui/icons-material/Bolt';
 
-
 const SustainableProducts = () => {
+  const { addToCart } = useCart();
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+
+  const handleAddToCart = async (productTitle, price) => {
+    try {
+      setLoading(true);
+      // Map product titles to package names expected by the backend
+      const packageMap = {
+        'Recycled Business Cards': 'Basic',
+        'Biodegradable Packaging': 'Pro',
+        'Eco-Friendly Labels': 'Pro',
+        'Green Marketing Materials': 'Premium'
+      };
+      const packageName = packageMap[productTitle];
+      console.log('Adding to cart:', { packageName });
+      await addToCart(3, packageName, 1); // Using 3 as the ID for sustainable products service
+      console.log('Successfully added to cart');
+      navigate('/cart');
+    } catch (error) {
+      console.error('Error adding to cart:', error);
+      alert('Failed to add item to cart. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const features = [
     {
       icon: <NatureIcon className="text-green-600 text-4xl" />,
@@ -133,8 +161,12 @@ const SustainableProducts = () => {
                 <p className="text-gray-500 mb-4">{product.description}</p>
                 <div className="flex items-center justify-between">
                   <span className="text-green-600 font-medium">{product.price}</span>
-                  <button className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700">
-                    Learn More
+                  <button 
+                    onClick={() => handleAddToCart(product.title, product.price)}
+                    disabled={loading}
+                    className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {loading ? 'Adding...' : 'Add to Cart'}
                   </button>
                 </div>
               </div>

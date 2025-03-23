@@ -1,47 +1,77 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
+import { useCart } from '../../context/CartContext';
+import { useNavigate } from 'react-router-dom';
 import LocalPrintshopIcon from '@mui/icons-material/LocalPrintshop';
 import BrushIcon from '@mui/icons-material/Brush';
 import SpeedIcon from '@mui/icons-material/Speed';
 import VerifiedIcon from '@mui/icons-material/Verified';
 
 const MarketingMaterials = () => {
+  const { addToCart } = useCart();
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState(null);
+
+  const handleAddToCart = async (packageName) => {
+    try {
+      setLoading(true);
+      setSelectedProduct(packageName);
+      console.log('Adding to cart:', { packageName });
+      await addToCart(2, packageName, 1); // Using 2 as the ID for marketing materials service
+      console.log('Successfully added to cart');
+      navigate('/cart');
+    } catch (error) {
+      console.error('Error adding to cart:', error);
+      alert('Failed to add item to cart. Please try again.');
+    } finally {
+      setLoading(false);
+      setSelectedProduct(null);
+    }
+  };
+
   const products = [
     {
       title: 'Business Cards',
       description: 'Premium quality business cards with various finishes',
       image: 'https://via.placeholder.com/300x200',
-      price: 'Starting at $49.99'
+      price: 199,
+      packageName: 'Starter'
     },
     {
       title: 'Brochures',
       description: 'Professional brochures in various sizes and folds',
       image: 'https://via.placeholder.com/300x200',
-      price: 'Starting at $99.99'
+      price: 399,
+      packageName: 'Business'
     },
     {
       title: 'Flyers',
       description: 'Eye-catching flyers for promotions and events',
       image: 'https://via.placeholder.com/300x200',
-      price: 'Starting at $79.99'
+      price: 699,
+      packageName: 'Enterprise'
     },
     {
       title: 'Banners',
       description: 'Large format banners for indoor and outdoor use',
       image: 'https://via.placeholder.com/300x200',
-      price: 'Starting at $129.99'
+      price: 1299,
+      packageName: 'Business'
     },
     {
       title: 'Posters',
       description: 'High-quality posters in various sizes',
       image: 'https://via.placeholder.com/300x200',
-      price: 'Starting at $39.99'
+      price: 399,
+      packageName: 'Business'
     },
     {
       title: 'Postcards',
       description: 'Custom postcards for direct mail campaigns',
       image: 'https://via.placeholder.com/300x200',
-      price: 'Starting at $29.99'
+      price: 299,
+      packageName: 'Starter'
     }
   ];
 
@@ -125,9 +155,13 @@ const MarketingMaterials = () => {
                 <h3 className="text-xl font-bold text-gray-900 mb-2">{product.title}</h3>
                 <p className="text-gray-500 mb-4">{product.description}</p>
                 <div className="flex items-center justify-between">
-                  <span className="text-blue-600 font-medium">{product.price}</span>
-                  <button className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">
-                    Order Now
+                  <span className="text-blue-600 font-medium">${product.price}</span>
+                  <button 
+                    onClick={() => handleAddToCart(product.packageName)}
+                    disabled={loading && selectedProduct === product.packageName}
+                    className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {loading && selectedProduct === product.packageName ? 'Adding...' : 'Add to Cart'}
                   </button>
                 </div>
               </div>
