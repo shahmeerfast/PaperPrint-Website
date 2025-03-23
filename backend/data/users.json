@@ -1,0 +1,13 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "firstName": "Muhammad",
+      "lastName": "Shahmeer",
+      "email": "shahmeer@gmail.com",
+      "password": "$2a$10$iFgaFuZO8VnsKudI/SBZ8ukCohOlmQtuSs109vi5nXB63HvR.w7Pu",
+      "phone": "1234567789",
+      "createdAt": "2025-03-23T09:55:49.829Z"
+    }
+  ]
+}
